@@ -78,18 +78,22 @@ def my_func(x):
 rag(my_func)(ma)  # padding ignored throughout
 ```
 
-### Composing with `jit` and `vmap`
+### Batched arrays (auto-vmap)
+
+`rag(f)` automatically vmaps over batched (2D+) MaskedArrays:
+
+```python
+ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
+
+rag(jnp.mean)(ma)  # → [2.0, 4.5] — no vmap needed
+```
+
+### Composing with `jit`
 
 ```python
 import jax
 
-ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
-
-# vmap over a batch of ragged arrays
-jax.vmap(rag(jnp.mean))(ma)  # → [2.0, 4.5]
-
-# jit for performance
-jax.jit(jax.vmap(rag(jnp.mean)))(ma)  # → [2.0, 4.5]
+jax.jit(rag(jnp.mean))(ma)  # → [2.0, 4.5]
 ```
 
 ## Supported Operations

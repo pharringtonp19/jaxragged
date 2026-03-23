@@ -18,20 +18,20 @@ print()
 
 # With ragged: padding is ignored
 print("With ragged (correct):")
-print(f"  mean per row: {jax.vmap(rag(jnp.mean))(ma)}")
-print(f"  min per row:  {jax.vmap(rag(jnp.min))(ma)}")
-print(f"  max per row:  {jax.vmap(rag(jnp.max))(ma)}")
-print(f"  sum per row:  {jax.vmap(rag(jnp.sum))(ma)}")
-print(f"  std per row:  {jax.vmap(rag(jnp.std))(ma)}")
+print(f"  mean per row: {rag(jnp.mean)(ma)}")
+print(f"  min per row:  {rag(jnp.min)(ma)}")
+print(f"  max per row:  {rag(jnp.max)(ma)}")
+print(f"  sum per row:  {rag(jnp.sum)(ma)}")
+print(f"  std per row:  {rag(jnp.std)(ma)}")
 print()
 
 # Custom functions work too
 def rms(x):
     return jnp.sqrt(jnp.mean(x ** 2))
 
-print(f"  rms per row:  {jax.vmap(rag(rms))(ma)}")
+print(f"  rms per row:  {rag(rms)(ma)}")
 print()
 
 # Composes with jit
-jitted = jax.jit(jax.vmap(rag(jnp.mean)))
-print(f"  jit(vmap(ragged(mean))): {jitted(ma)}")
+jitted = jax.jit(rag(jnp.mean))
+print(f"  jit(rag(mean)): {jitted(ma)}")

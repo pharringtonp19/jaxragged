@@ -345,27 +345,37 @@ def _eval_masked_jaxpr(jaxpr, consts, data, mask):
 def ragged(f):
     """Transform f to automatically ignore masked/padded elements.
 
+    Automatically handles batched MaskedArrays (2D+) by vmapping
+    over the leading dimensions.
+
     Usage:
-        ma = MaskedArray(data, mask)
+        import jaxragged as rag
 
-        result = ragged(f)(ma)
-        # Equivalent to f applied only to the real elements
-
-        # Composes with jit and vmap:
-        result = jit(vmap(ragged(f)))(batch_of_masked_arrays)
+        ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
+        rag(jnp.mean)(ma)  # → [2.0, 4.5]
     """
 
     @functools.wraps(f)
-    def wrapped(masked_array):
+    def _single(masked_array):
+        """Apply f to a single 1D masked array."""
         if isinstance(masked_array, MaskedArray):
             data, mask = masked_array.data, masked_array.mask
         else:
             return f(masked_array)
 
-        # Step 1: trace f to get a flat jaxpr (no jit wrappers, just primitives)
         jaxpr = jax.make_jaxpr(f)(data)
-
-        # Step 2: evaluate the jaxpr with mask-aware interpretation
         return _eval_masked_jaxpr(jaxpr, jaxpr.consts, data, mask)
+
+    @functools.wraps(f)
+    def wrapped(masked_array):
+        if not isinstance(masked_array, MaskedArray):
+            return f(masked_array)
+
+        # If data is 1D, apply directly
+        if masked_array.data.ndim == 1:
+            return _single(masked_array)
+
+        # If batched (2D+), vmap over the leading dimension
+        return jax.vmap(_single)(masked_array)
 
     return wrapped
