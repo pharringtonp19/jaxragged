@@ -70,31 +70,27 @@ class TestCustomFunctions:
         assert ragged(f)(ma) == 13.0
 
 
-class TestBatched:
-    def test_auto_vmap_mean(self, batch_ma):
-        result = ragged(jnp.mean)(batch_ma)
-        assert jnp.allclose(result, jnp.array([2.0, 4.5]))
-
-    def test_auto_vmap_sum(self, batch_ma):
-        result = ragged(jnp.sum)(batch_ma)
-        assert jnp.allclose(result, jnp.array([6.0, 9.0]))
-
-    def test_auto_vmap_max(self, batch_ma):
-        result = ragged(jnp.max)(batch_ma)
-        assert jnp.allclose(result, jnp.array([3.0, 5.0]))
-
-    def test_auto_vmap_min(self, batch_ma):
-        result = ragged(jnp.min)(batch_ma)
-        assert jnp.allclose(result, jnp.array([1.0, 4.0]))
-
-    def test_auto_vmap_varied_lengths(self):
-        ma = MaskedArray.from_ragged([[1], [2, 3, 4, 5], [10, 20]])
-        result = ragged(jnp.mean)(ma)
-        assert jnp.allclose(result, jnp.array([1.0, 3.5, 15.0]))
-
-    def test_explicit_vmap_still_works(self, batch_ma):
+class TestVmap:
+    def test_vmap_mean(self, batch_ma):
         result = jax.vmap(ragged(jnp.mean))(batch_ma)
         assert jnp.allclose(result, jnp.array([2.0, 4.5]))
+
+    def test_vmap_sum(self, batch_ma):
+        result = jax.vmap(ragged(jnp.sum))(batch_ma)
+        assert jnp.allclose(result, jnp.array([6.0, 9.0]))
+
+    def test_vmap_max(self, batch_ma):
+        result = jax.vmap(ragged(jnp.max))(batch_ma)
+        assert jnp.allclose(result, jnp.array([3.0, 5.0]))
+
+    def test_vmap_min(self, batch_ma):
+        result = jax.vmap(ragged(jnp.min))(batch_ma)
+        assert jnp.allclose(result, jnp.array([1.0, 4.0]))
+
+    def test_vmap_varied_lengths(self):
+        ma = MaskedArray.from_ragged([[1], [2, 3, 4, 5], [10, 20]])
+        result = jax.vmap(ragged(jnp.mean))(ma)
+        assert jnp.allclose(result, jnp.array([1.0, 3.5, 15.0]))
 
 
 class TestJit:
@@ -102,8 +98,8 @@ class TestJit:
         result = jax.jit(ragged(jnp.mean))(simple_ma)
         assert result == 4.5
 
-    def test_jit_batched(self, batch_ma):
-        result = jax.jit(ragged(jnp.mean))(batch_ma)
+    def test_jit_vmap(self, batch_ma):
+        result = jax.jit(jax.vmap(ragged(jnp.mean)))(batch_ma)
         assert jnp.allclose(result, jnp.array([2.0, 4.5]))
 
 
