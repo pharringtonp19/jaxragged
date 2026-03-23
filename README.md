@@ -5,11 +5,11 @@ A [Jaxpr interpreter](https://docs.jax.dev/en/latest/notebooks/Writing_custom_in
 ```python
 import jax
 import jax.numpy as jnp
-import jaxragged as jr
+import jaxragged as rag
 
-ma = jr.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
+ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
 
-result = jax.vmap(jr.ragged(jnp.mean))(ma)
+result = jax.vmap(rag(jnp.mean))(ma)
 # → [2.0, 4.5]  (correct means, ignoring padding)
 ```
 
@@ -50,22 +50,22 @@ pip install jaxragged
 
 ```python
 import jax.numpy as jnp
-import jaxragged as jr
+import jaxragged as rag
 
 data = jnp.array([4.0, 5.0, 0.0, 0.0])
 mask = jnp.array([True, True, False, False])
-ma = jr.MaskedArray(data, mask)
+ma = rag.MaskedArray(data, mask)
 
-jr.ragged(jnp.mean)(ma)  # → 4.5
-jr.ragged(jnp.min)(ma)   # → 4.0
-jr.ragged(jnp.max)(ma)   # → 5.0
-jr.ragged(jnp.std)(ma)   # → 0.5
+rag(jnp.mean)(ma)  # → 4.5
+rag(jnp.min)(ma)   # → 4.0
+rag(jnp.max)(ma)   # → 5.0
+rag(jnp.std)(ma)   # → 0.5
 ```
 
 ### From ragged lists
 
 ```python
-ma = jr.MaskedArray.from_ragged([[1, 2, 3], [4, 5], [6]])
+ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5], [6]])
 # Automatically pads to uniform length and creates the mask
 ```
 
@@ -75,7 +75,7 @@ ma = jr.MaskedArray.from_ragged([[1, 2, 3], [4, 5], [6]])
 def my_func(x):
     return jnp.sum(x ** 2) / jnp.sum(x)
 
-jr.ragged(my_func)(ma)  # padding ignored throughout
+rag(my_func)(ma)  # padding ignored throughout
 ```
 
 ### Composing with `jit` and `vmap`
@@ -83,13 +83,13 @@ jr.ragged(my_func)(ma)  # padding ignored throughout
 ```python
 import jax
 
-ma = jr.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
+ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
 
 # vmap over a batch of ragged arrays
-jax.vmap(jr.ragged(jnp.mean))(ma)  # → [2.0, 4.5]
+jax.vmap(rag(jnp.mean))(ma)  # → [2.0, 4.5]
 
 # jit for performance
-jax.jit(jax.vmap(jr.ragged(jnp.mean)))(ma)  # → [2.0, 4.5]
+jax.jit(jax.vmap(rag(jnp.mean)))(ma)  # → [2.0, 4.5]
 ```
 
 ## Supported Operations

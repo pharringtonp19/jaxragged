@@ -3,10 +3,10 @@
 import jax
 import jax.numpy as jnp
 
-import jaxragged as jr
+import jaxragged as rag
 
 # Create a batch of ragged arrays
-ma = jr.MaskedArray.from_ragged([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
+ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5], [6, 7, 8, 9]])
 print(f"data:\n{ma.data}\n")
 print(f"mask:\n{ma.mask}\n")
 
@@ -18,20 +18,20 @@ print()
 
 # With ragged: padding is ignored
 print("With ragged (correct):")
-print(f"  mean per row: {jax.vmap(jr.ragged(jnp.mean))(ma)}")
-print(f"  min per row:  {jax.vmap(jr.ragged(jnp.min))(ma)}")
-print(f"  max per row:  {jax.vmap(jr.ragged(jnp.max))(ma)}")
-print(f"  sum per row:  {jax.vmap(jr.ragged(jnp.sum))(ma)}")
-print(f"  std per row:  {jax.vmap(jr.ragged(jnp.std))(ma)}")
+print(f"  mean per row: {jax.vmap(rag(jnp.mean))(ma)}")
+print(f"  min per row:  {jax.vmap(rag(jnp.min))(ma)}")
+print(f"  max per row:  {jax.vmap(rag(jnp.max))(ma)}")
+print(f"  sum per row:  {jax.vmap(rag(jnp.sum))(ma)}")
+print(f"  std per row:  {jax.vmap(rag(jnp.std))(ma)}")
 print()
 
 # Custom functions work too
 def rms(x):
     return jnp.sqrt(jnp.mean(x ** 2))
 
-print(f"  rms per row:  {jax.vmap(jr.ragged(rms))(ma)}")
+print(f"  rms per row:  {jax.vmap(rag(rms))(ma)}")
 print()
 
 # Composes with jit
-jitted = jax.jit(jax.vmap(jr.ragged(jnp.mean)))
+jitted = jax.jit(jax.vmap(rag(jnp.mean)))
 print(f"  jit(vmap(ragged(mean))): {jitted(ma)}")

@@ -3,14 +3,14 @@ ragged: A JAX transformation that makes functions automatically ignore
 masked/padded elements in arrays.
 
 Usage:
-    from ragged import ragged, MaskedArray
+    import jaxragged as rag
 
-    ma = MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
+    ma = rag.MaskedArray.from_ragged([[1, 2, 3], [4, 5]])
 
     def f(x):
         return jnp.mean(x)
 
-    result = jit(vmap(ragged(f)))(ma)
+    result = jit(vmap(rag(f)))(ma)
     # → [2.0, 4.5]  (correct means, ignoring padding)
 """
 
